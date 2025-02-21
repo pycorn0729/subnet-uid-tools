@@ -50,12 +50,11 @@ def _get_related_uids_in_subnet(
 
 
 def get_related_uids_in_subnet(
-    network: str,
+    subtensor: bt.subtensor,
     subnet_uid: int,
     uid: int,
 ) -> Dict[str, int | List[int]]:    
-    bt.logging.info(f"Getting related uids in subnet {subnet_uid} for uid {uid} in network {network}")
-    subtensor = bt.subtensor(network=network)
+    bt.logging.info(f"Getting related uids in subnet {subnet_uid} for uid {uid}")
     number_of_subnets = subtensor.metagraph(0).n.item()
     ips_dict = defaultdict(list)
     coldkeys_dict = defaultdict(list)
@@ -102,14 +101,3 @@ def get_related_uids_in_subnet(
         "all_subnets_related_uids": related_uids_in_all_subnets,
     }
 
-if __name__ == "__main__":
-    bt.logging.set_info(True)
-    
-    related_uids = get_related_uids_in_subnet(network="finney", subnet_uid=54, uid=0)
-    bt.logging.info(
-        f"\n"
-        f"total_uids_in_this_subnet: {related_uids['total_uids_in_this_subnet']}\n"
-        f"related_uids_in_this_subnet: {related_uids['related_uids_in_this_subnet']}\n"
-        f"total_uids_in_all_subnets: {related_uids['total_uids_in_all_subnets']}\n"
-        f"all_subnets_related_uids: {related_uids['all_subnets_related_uids']}\n"
-    )
