@@ -4,4 +4,9 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "async-substrate-interface==1.0.0",
+    "bt-decode==0.5.0a2",
+    "bittensor==9.0.0",
+    "bittensor-cli==9.0.0",
+]
