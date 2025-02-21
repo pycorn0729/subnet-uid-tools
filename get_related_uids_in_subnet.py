@@ -105,7 +105,7 @@ def get_related_uids_in_subnet(
 if __name__ == "__main__":
     bt.logging.set_info(True)
     
-    related_uids = get_related_uids_in_subnet(network="finney", subnet_uid=54, uid=17)
+    related_uids = get_related_uids_in_subnet(network="finney", subnet_uid=54, uid=0)
     bt.logging.info(
         f"\n"
         f"total_uids_in_this_subnet: {related_uids['total_uids_in_this_subnet']}\n"
