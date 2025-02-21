@@ -45,6 +45,20 @@ FRONTEND_TEMPLATE = Template(
                         </p>    
                     </div>
                 </div>
+                <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6 mt-6">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Code Repository</h1>
+                    <div class="space-y-4">
+                        <p class="text-gray-700">
+                            <span class="font-semibold">GitHub Repository:</span>
+                            <a href="https://github.com/pycorn0729/subnet-uid-tools.git" class="text-blue-500 hover:text-blue-700 ml-2">
+                                https://github.com/pycorn0729/subnet-uid-tools.git
+                            </a>
+                        </p>
+                        <p class="text-gray-600 text-sm mt-2">
+                            Visit the repository for source code and documentation.
+                        </p>
+                    </div>
+                </div>
             </body>
         </html>
     """
