@@ -4,8 +4,8 @@ author: pycorn0729
 """
 
 import bittensor as bt
+from collections import defaultdict
 from typing import List, Tuple, Dict
-
 
 def _get_related_uids_in_subnet(
     ips_dict: dict,
@@ -13,44 +13,39 @@ def _get_related_uids_in_subnet(
     axon_infos: dict,
     subnet_uid: int,
     uid: int,
-    visited_dict: dict = {},
-) -> List[Tuple[int, int]]:    
-    axon_info = axon_infos.get((subnet_uid, uid), None)
-    if axon_info is None:
-        return []
+) -> List[Tuple[int, int]]:        
+    bt.logging.info(f"Starting BFS from subnet_uid: {subnet_uid}, uid: {uid}")
     
-    if (subnet_uid, uid) in visited_dict:
-        return []
-    
-    bt.logging.info(f"Visiting subnet_uid: {subnet_uid}, uid: {uid}")
-    
+    visited_dict: dict = {}
+    queue = [(subnet_uid, uid)]
+    related_uids = []
     visited_dict[(subnet_uid, uid)] = True
-    related_uids = [(subnet_uid, uid)]
-    coldkey = axon_info["coldkey"]
-    ip = axon_info["ip"]
     
-    for subnet_uid, uid in coldkeys_dict.get(coldkey, []):
-        related_uids.extend(
-            _get_related_uids_in_subnet(
-                ips_dict,
-                coldkeys_dict,
-                axon_infos,
-                subnet_uid,
-                uid,
-            )
-        )
-
-    for subnet_uid, uid in ips_dict.get(ip, []):
-        related_uids.extend(
-            _get_related_uids_in_subnet(
-                ips_dict,
-                coldkeys_dict,
-                axon_infos,
-                subnet_uid,
-                uid,
-            )
-        )
-    
+    while queue:
+        current_subnet_uid, current_uid = queue.pop(0)
+        bt.logging.info(f"Visiting subnet_uid: {current_subnet_uid}, uid: {current_uid}")
+        
+        current_axon_info = axon_infos.get((current_subnet_uid, current_uid), None)
+        if current_axon_info is None:
+            continue
+            
+        related_uids.append((current_subnet_uid, current_uid))
+        
+        coldkey = current_axon_info["coldkey"]
+        ip = current_axon_info["ip"]
+        
+        # Add coldkey-related nodes to queue
+        for next_subnet_uid, next_uid in coldkeys_dict.get(coldkey, []):
+            if (next_subnet_uid, next_uid) not in visited_dict:
+                queue.append((next_subnet_uid, next_uid))
+                visited_dict[(next_subnet_uid, next_uid)] = True
+                
+        # Add IP-related nodes to queue
+        for next_subnet_uid, next_uid in ips_dict.get(ip, []):
+            if (next_subnet_uid, next_uid) not in visited_dict:
+                queue.append((next_subnet_uid, next_uid))
+                visited_dict[(next_subnet_uid, next_uid)] = True
+                
     return related_uids
 
 
@@ -62,26 +57,27 @@ def get_related_uids_in_subnet(
     bt.logging.info(f"Getting related uids in subnet {subnet_uid} for uid {uid} in network {network}")
     subtensor = bt.subtensor(network=network)
     number_of_subnets = subtensor.metagraph(0).n.item()
-    ips_dict = {}
-    coldkeys_dict = {}
+    ips_dict = defaultdict(list)
+    coldkeys_dict = defaultdict(list)
     axon_infos = {}
     
-    bt.logging.info(f"The number of subnets: {number_of_subnets}")
-    bt.logging.info(f"Getting metagraph for all subnets")
-    for subnet_uid in range(1, number_of_subnets + 1):
-        metagraph = subtensor.metagraph(subnet_uid)
+    bt.logging.info(
+        f"\n"
+        f"The number of subnets: {number_of_subnets}\n"
+        f"Getting metagraph for all subnets..."
+    )
+    for _subnet_uid in range(1, number_of_subnets + 1):
+        metagraph = subtensor.metagraph(_subnet_uid)
         number_of_uids = metagraph.n.item()
-        for uid in range(number_of_uids):
-            ip = metagraph.addresses[uid].split(":")[0]
-            if ip != "0.0.0.0":
-                ips_dict[ip] = ips_dict.get(ip, [])
-                ips_dict[ip].append((subnet_uid, uid))
+        for _uid in range(number_of_uids):
+            ip = metagraph.addresses[_uid].split(":")[0]
+            if ip != "/ipv0/0.0.0.0":
+                ips_dict[ip].append((_subnet_uid, _uid))
             
-            coldkey = metagraph.axons[uid].coldkey
-            coldkeys_dict[coldkey] = coldkeys_dict.get(coldkey, [])
-            coldkeys_dict[coldkey].append((subnet_uid, uid))
-            
-            axon_infos[(subnet_uid, uid)] = {
+            coldkey = metagraph.axons[_uid].coldkey
+            coldkeys_dict[coldkey].append((_subnet_uid, _uid))
+
+            axon_infos[(_subnet_uid, _uid)] = {
                 "ip": ip,
                 "coldkey": coldkey,
             }
@@ -94,15 +90,26 @@ def get_related_uids_in_subnet(
         subnet_uid,
         uid,
     )
+    related_uids_in_all_subnets = sorted(list(related_uids_in_all_subnets))
     related_uids = [
-        uid for subnet_uid, uid in related_uids_in_all_subnets if subnet_uid == subnet_uid
+        _uid for _subnet_uid, _uid in related_uids_in_all_subnets if _subnet_uid == subnet_uid
     ]
     
     return {
-        "total_uids": len(related_uids),
-        "related_uids": related_uids,
+        "total_uids_in_this_subnet": len(related_uids),
+        "related_uids_in_this_subnet": related_uids,
+        "total_uids_in_all_subnets": len(related_uids_in_all_subnets),
+        "all_subnets_related_uids": related_uids_in_all_subnets,
     }
 
 if __name__ == "__main__":
     bt.logging.set_info(True)
-    bt.logging.info(get_related_uids_in_subnet(network="finney", subnet_uid=54, uid=17))
+    
+    related_uids = get_related_uids_in_subnet(network="finney", subnet_uid=54, uid=17)
+    bt.logging.info(
+        f"\n"
+        f"total_uids_in_this_subnet: {related_uids['total_uids_in_this_subnet']}\n"
+        f"related_uids_in_this_subnet: {related_uids['related_uids_in_this_subnet']}\n"
+        f"total_uids_in_all_subnets: {related_uids['total_uids_in_all_subnets']}\n"
+        f"all_subnets_related_uids: {related_uids['all_subnets_related_uids']}\n"
+    )
