@@ -22,6 +22,8 @@ def _get_related_uids_in_subnet(
     if (subnet_uid, uid) in visited_dict:
         return []
     
+    bt.logging.info(f"Visiting subnet_uid: {subnet_uid}, uid: {uid}")
+    
     visited_dict[(subnet_uid, uid)] = True
     related_uids = [(subnet_uid, uid)]
     coldkey = axon_info["coldkey"]
@@ -64,6 +66,7 @@ def get_related_uids_in_subnet(
     coldkeys_dict = {}
     axon_infos = {}
     
+    bt.logging.info(f"The number of subnets: {number_of_subnets}")
     bt.logging.info(f"Getting metagraph for all subnets")
     for subnet_uid in range(1, number_of_subnets + 1):
         metagraph = subtensor.metagraph(subnet_uid)
