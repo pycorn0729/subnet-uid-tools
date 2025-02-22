@@ -71,7 +71,13 @@ class Tensor:
         }
 
     def get_related_uids(self, subnet_uid: int, uid: int):
-        return get_related_uids_in_subnet(self.subtensor, subnet_uid, uid)
+        try:
+            return get_related_uids_in_subnet(self.subtensor, subnet_uid, uid)
+        except Exception as e:
+            bt.logging.error(f"Error getting related uids: {e}")
+            return {
+                "error": str(e)
+            }
 
 tensor = Tensor()
 
