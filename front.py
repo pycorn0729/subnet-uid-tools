@@ -37,14 +37,7 @@ FRONTEND_TEMPLATE = Template(
                         </p>
                     </div>
                 </div>
-                <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
-                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Go to Url And Get Related Uids</h1>
-                    <div class="space-y-4">
-                        <p class="text-gray-700">
-                            http://209.126.9.130:8007/related_uids?subnet_uid=54&uid=134
-                        </p>    
-                    </div>
-                </div>
+                
                 <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6 mt-6">
                     <h1 class="text-3xl font-bold text-gray-800 mb-6">Code Repository</h1>
                     <div class="space-y-4">

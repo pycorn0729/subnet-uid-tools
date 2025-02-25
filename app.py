@@ -13,7 +13,7 @@ SESSION_WINDOW_BLOCKS = TEMPO_BLOCKS * 5 # session window blocks
 BLOCK_IN_SECONDS = 12 # block in seconds
 AVAILABLE_COMPETITIONS = [
     "accuracy",
-    "quality", 
+    "accuracy", 
     "seo",
     "balanced"
 ]
@@ -22,7 +22,7 @@ app = FastAPI()
 
 class Tensor:
     def __init__(self):
-        self.subtensor = bt.subtensor(network="subvortex")
+        self.subtensor = bt.subtensor(network="finney")
     
     def get_current_session_info(self):
         block = self.subtensor.get_current_block()
