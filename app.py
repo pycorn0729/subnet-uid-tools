@@ -32,13 +32,13 @@ class Tensor:
         current_competition = AVAILABLE_COMPETITIONS[current_index]
         current_datetime = time.strftime(
             '%Y-%m-%d %H:%M:%S', 
-            time.localtime(time.time())
+            time.gmtime(time.time())
         )
         elapsed_blocks = block - (session * SESSION_WINDOW_BLOCKS)
         session_start_time = time.time() - (elapsed_blocks * BLOCK_IN_SECONDS)
         session_start_datetime = time.strftime(
             '%Y-%m-%d %H:%M:%S',
-            time.localtime(session_start_time)
+            time.gmtime(session_start_time)
         )
         
         # Calculate hours, minutes, seconds ago
@@ -52,7 +52,7 @@ class Tensor:
         session_end_time = session_start_time + (SESSION_WINDOW_BLOCKS * BLOCK_IN_SECONDS)
         session_end_datetime = time.strftime(
             '%Y-%m-%d %H:%M:%S',
-            time.localtime(session_end_time)
+            time.gmtime(session_end_time)
         )
         # Calculate hours, minutes, seconds until end
         time_until_end = session_end_time - time.time()
