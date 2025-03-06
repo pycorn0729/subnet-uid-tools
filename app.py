@@ -13,9 +13,9 @@ SESSION_WINDOW_BLOCKS = TEMPO_BLOCKS * 5 # session window blocks
 BLOCK_IN_SECONDS = 12 # block in seconds
 AVAILABLE_COMPETITIONS = [
     "accuracy",
-    "accuracy", 
+    "seo", 
     "seo",
-    "balanced"
+    "seo",
 ]
 
 lock = threading.RLock()
