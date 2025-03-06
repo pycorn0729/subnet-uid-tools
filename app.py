@@ -23,6 +23,7 @@ app = FastAPI()
 class Tensor:
     def __init__(self):
         self.subtensor = bt.subtensor(network="local")
+        bt.logging.set_debug(True)
     
     def get_current_session_info(self):
         block = self.subtensor.get_current_block()
