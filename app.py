@@ -22,7 +22,7 @@ app = FastAPI()
 
 class Tensor:
     def __init__(self):
-        self.subtensor = bt.subtensor(network="finney")
+        self.subtensor = bt.subtensor(network="local")
     
     def get_current_session_info(self):
         block = self.subtensor.get_current_block()
