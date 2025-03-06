@@ -2,7 +2,7 @@ import bittensor as bt
 import json
 import time
 import uvicorn
-
+import threading
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from front import FRONTEND_TEMPLATE
@@ -17,6 +17,8 @@ AVAILABLE_COMPETITIONS = [
     "seo",
     "balanced"
 ]
+
+lock = threading.RLock()
 
 app = FastAPI()
 
@@ -84,12 +86,13 @@ tensor = Tensor()
 
 @app.get("/session")
 def read_session():
-    return tensor.get_current_session_info()
-
+    with lock:
+        return tensor.get_current_session_info()
 
 @app.get("/")
 def read_root():
-    info = tensor.get_current_session_info()
+    with lock:
+        info = tensor.get_current_session_info()
     return HTMLResponse(
         content=FRONTEND_TEMPLATE.render(
             available_competitions=AVAILABLE_COMPETITIONS,
@@ -101,10 +104,11 @@ def read_root():
 
 @app.get("/related_uids")
 def read_related_uids(subnet_uid: int, uid: int):
-    return HTMLResponse(
-        content=json.dumps(tensor.get_related_uids(subnet_uid, uid)),
-        media_type="application/json"
-    )
+    with lock:
+        return HTMLResponse(
+            content=json.dumps(tensor.get_related_uids(subnet_uid, uid)),
+            media_type="application/json"
+        )
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8007)
